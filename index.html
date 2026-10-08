@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>EduForge</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<style>
+  :root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+  html{scroll-padding-top:env(safe-area-inset-top,0px)}
+  body{background:#f1f5f9;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+  .doc:focus{outline:none}
+  .doc h2{font-weight:700;font-size:1.05rem;color:#0c4a6e;margin:1.4rem 0 .5rem;border-bottom:1px solid #e2e8f0;padding-bottom:.25rem}
+  .doc h3{font-weight:600;color:#075985;margin:.9rem 0 .25rem}
+  .doc ul{list-style:disc;padding-left:1.25rem}.doc ol{list-style:decimal;padding-left:1.25rem}
+  .doc li{margin:.2rem 0}.doc p{margin:.4rem 0}
+  .doc table{width:100%;border-collapse:collapse;font-size:.85rem;margin:.5rem 0}
+  .doc td,.doc th{border:1px solid #cbd5e1;padding:.4rem .6rem;vertical-align:top;text-align:left}
+  .doc th{background:#e0f2fe}
+  .doc .ln{border-bottom:1px dotted #94a3b8;height:1.4rem}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect } = React;
+
+const P = {
+  plus:"M12 5v14M5 12h14", file:"M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8zM14 3v5h5M9 13h6M9 17h6",
+  left:"M19 12H5M12 19l-7-7 7-7", down:"M12 3v12M7 10l5 5 5-5M5 21h14",
+  spark:"M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z", home:"M3 11l9-8 9 8M5 10v10h14V10",
+  cap:"M2 9l10-5 10 5-10 5zM6 11.5V16c0 1 3 3 6 3s6-2 6-3v-4.5", bold:"M7 5h6a3.5 3.5 0 0 1 0 7H7zM7 12h7a3.5 3.5 0 0 1 0 7H7z",
+  ital:"M19 4h-9M14 20H5M15 4L9 20", list:"M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01",
+  menu:"M4 6h16M4 12h16M4 18h16", check:"M5 12l5 5L20 7", user:"M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z", out:"M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9",
+  edit:"M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z", help:"M9 9a3 3 0 1 1 4 2.8c-.8.4-1 1-1 1.7M12 17h.01M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z",
+};
+const Icon = ({ n, c = "w-5 h-5" }) => (
+  <svg className={c} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d={P[n]} /></svg>
+);
+
+const AVATAR = "data:image/svg+xml;utf8," + encodeURIComponent("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' fill='#bae6fd'/><circle cx='32' cy='25' r='11' fill='#0c4a6e'/><path d='M10 64c2-16 14-22 22-22s20 6 22 22z' fill='#0369a1'/></svg>");
+const USER = { nama: "Siti Rahmawati, S.Pd.", panggilan: "Bu Siti", sekolah: "SMK Negeri 1 Contoh", peran: "Guru Mata Pelajaran" };
+
+const FASE = {
+  SD: ["Fase A (Kelas 1–2)", "Fase B (Kelas 3–4)", "Fase C (Kelas 5–6)"],
+  SMP: ["Fase D (Kelas 7)", "Fase D (Kelas 8)", "Fase D (Kelas 9)"],
+  SMA: ["Fase E (Kelas X)", "Fase F (Kelas XI)", "Fase F (Kelas XII)"],
+  SMK: ["Fase E (Kelas X)", "Fase F (Kelas XI)", "Fase F (Kelas XII)"],
+};
+const PROGRAM = ["Teknik Komputer dan Jaringan", "Pengembangan Perangkat Lunak dan Gim", "Akuntansi dan Keuangan Lembaga", "Manajemen Perkantoran dan Layanan Bisnis", "Pemasaran", "Desain Komunikasi Visual", "Teknik Kendaraan Ringan Otomotif", "Teknik Pemesinan", "Teknik Instalasi Tenaga Listrik", "Perhotelan", "Kuliner", "Agribisnis Tanaman", "Farmasi Klinis dan Komunitas", "Asisten Keperawatan"];
+const STRATEGI = {
+  "Pembelajaran Berdiferensiasi": "menyesuaikan konten, proses, dan produk belajar dengan kesiapan, minat, dan profil belajar peserta didik",
+  "Pembelajaran Kolaboratif": "mengutamakan kerja sama dan saling ketergantungan positif antarpeserta didik",
+  "Pembelajaran Berbasis Inkuiri": "mendorong peserta didik menemukan konsep sendiri melalui pertanyaan dan penyelidikan",
+  "Pembelajaran Kontekstual (CTL)": "mengaitkan materi dengan situasi nyata dan pengalaman peserta didik",
+  "Pembelajaran Langsung (Ekspositori)": "guru memandu penyampaian materi secara terstruktur disertai latihan bertahap",
+};
+const SYN = {
+  "Problem Based Learning (PBL)": [["Orientasi peserta didik pada masalah","Guru menyajikan masalah kontekstual tentang {t}; peserta didik mengidentifikasi hal yang diketahui, ditanyakan, dan dugaan awal."],["Mengorganisasi peserta didik","Peserta didik membentuk kelompok heterogen (4–5 orang), membagi peran, dan menyusun rencana penyelesaian masalah."],["Membimbing penyelidikan","Kelompok mengumpulkan data dari buku teks, sumber digital, dan LKPD; guru memberi pertanyaan penuntun dan umpan balik."],["Mengembangkan dan menyajikan hasil","Kelompok menyusun solusi atas masalah {t} dan mempresentasikannya; kelompok lain menanggapi."],["Menganalisis dan mengevaluasi proses","Guru dan peserta didik mengevaluasi kualitas solusi serta proses berpikir yang digunakan."]],
+  "Project Based Learning (PjBL)": [["Pertanyaan esensial","Guru memaparkan pertanyaan esensial terkait {t}; peserta didik menentukan gagasan proyek."],["Menyusun perencanaan proyek","Kelompok merancang langkah, pembagian tugas, alat, dan bahan proyek."],["Menyusun jadwal","Kelompok dan guru menyepakati tahapan serta tenggat setiap kegiatan proyek."],["Memonitor pelaksanaan proyek","Peserta didik mengerjakan proyek; guru memantau kemajuan dan memberi bimbingan."],["Menguji hasil dan presentasi","Produk proyek dipresentasikan dan dinilai dengan rubrik bersama."],["Evaluasi pengalaman","Peserta didik merefleksikan kendala, solusi, dan pembelajaran dari proyek {t}."]],
+  "Discovery Learning": [["Stimulasi","Guru menampilkan fenomena atau gambar yang memancing rasa ingin tahu tentang {t}."],["Identifikasi masalah","Peserta didik merumuskan pertanyaan dan hipotesis sementara."],["Pengumpulan data","Peserta didik mengamati, membaca sumber, atau bereksperimen untuk mengumpulkan data."],["Pengolahan data","Data diolah, dikelompokkan, dan ditafsirkan secara berkelompok."],["Pembuktian","Peserta didik memeriksa kebenaran hipotesis dengan data yang diperoleh."],["Generalisasi","Peserta didik menarik simpulan umum tentang {t}."]],
+  "Inquiry Learning": [["Orientasi","Guru membangun suasana belajar dan menyampaikan topik {t}."],["Merumuskan masalah","Peserta didik merumuskan pertanyaan penyelidikan."],["Mengajukan hipotesis","Kelompok menyusun jawaban sementara."],["Mengumpulkan data","Peserta didik mencari dan mencatat informasi relevan."],["Menguji hipotesis","Data dianalisis untuk menerima atau merevisi hipotesis."],["Merumuskan kesimpulan","Peserta didik menyimpulkan temuan dan mengomunikasikannya."]],
+  "Cooperative Learning (Jigsaw)": [["Pembentukan kelompok asal","Kelas dibagi menjadi kelompok asal (4–5 orang); setiap anggota mendapat sub-materi {t} yang berbeda."],["Kelompok ahli","Anggota dengan sub-materi sama berkumpul dan mendalami materinya."],["Kembali ke kelompok asal","Setiap ahli mengajarkan sub-materinya kepada anggota kelompok asal."],["Presentasi dan diskusi kelas","Perwakilan kelompok memaparkan rangkuman; guru meluruskan konsep."],["Kuis individu","Peserta didik mengerjakan kuis singkat; skor kelompok dihitung dari perkembangan skor."]],
+  "Direct Instruction": [["Orientasi","Guru menyampaikan tujuan dan membangkitkan pengetahuan awal tentang {t}."],["Presentasi dan demonstrasi","Guru menjelaskan konsep dan mendemonstrasikan langkah secara runtut."],["Latihan terbimbing","Peserta didik berlatih dengan arahan guru dan umpan balik langsung."],["Umpan balik","Guru memeriksa pemahaman dan memperbaiki kesalahan."],["Latihan mandiri","Peserta didik mengerjakan tugas mandiri untuk memperkuat penguasaan {t}."]],
+  "Teaching Factory (TEFA)": [["Orientasi produk/jasa","Guru memaparkan kebutuhan pelanggan atau industri terkait {t}."],["Perencanaan produksi","Kelompok merancang alur kerja, standar mutu, dan pembagian tugas."],["Pelaksanaan produksi","Peserta didik mengerjakan produk/jasa mengikuti prosedur dan K3."],["Kendali mutu","Hasil diperiksa terhadap standar kompetensi industri."],["Presentasi dan refleksi","Produk dipresentasikan kepada guru/mitra industri dan direfleksikan."]],
+};
+const METODE = ["Ceramah interaktif","Diskusi kelompok","Tanya jawab","Demonstrasi","Praktikum","Studi kasus","Simulasi","Presentasi"];
+const DIM = ["Keimanan dan Ketakwaan terhadap Tuhan YME", "Kewargaan", "Penalaran Kritis", "Kreativitas", "Kolaborasi", "Kemandirian", "Kesehatan", "Komunikasi"];
+const JENIS = ["Penemuan (Inkuiri)", "Eksperimen / Praktikum", "Latihan Terstruktur", "Proyek", "Studi Kasus"];
+const KOMP = ["Tabel hasil", "Pertanyaan diskusi", "Refleksi diri", "Rubrik"];
+const META = { RPP: "Isi identitas pembelajaran, praktik pedagogis, dan dimensi profil lulusan.", LKPD: "Tentukan jenis LKPD, bentuk pengerjaan, model, dan komponen lembar kerja.", "Bank Soal": "Atur komposisi soal, level kognitif, dan kelengkapan kunci jawaban." };
+const TITLE = { RPP: "Rencana Pelaksanaan Pembelajaran (RPP)", LKPD: "Lembar Kerja Peserta Didik (LKPD)", "Bank Soal": "Bank Soal Latihan" };
+
+const mins = w => { const n = (w.match(/\d+/g) || []).map(Number); return n.length > 1 ? n[0] * n[1] : (n[0] || 90); };
+const r5 = x => Math.max(5, Math.round(x / 5) * 5);
+const ul = a => "<ul>" + a.map(x => `<li>${x}</li>`).join("") + "</ul>";
+const ol = a => "<ol>" + a.map(x => `<li>${x}</li>`).join("") + "</ol>";
+const tbl = (h, r) => `<div style="overflow-x:auto"><table>${h ? "<tr>" + h.map(x => `<th>${x}</th>`).join("") + "</tr>" : ""}${r.map(x => "<tr>" + x.map(c => `<td>${c}</td>`).join("") + "</tr>").join("")}</table></div>`;
+const lines = n => Array(n).fill('<div class="ln"></div>').join("");
+const syn = d => SYN[d.model].map(([a, b]) => [a, b.replace(/\{t\}/g, d.topik)]);
+const approach = (d, s = true) => `<p><b>Pendekatan:</b> ${s ? d.strategi + "; " : ""}model <b>${d.model}</b>; metode ${d.metode.join(", ")}.</p>`;
+const EXTRA = { RPP: d => [["Jumlah Pertemuan", d.pertemuan]], LKPD: d => [["Jenis LKPD", d.jenisLkpd], ["Bentuk Pengerjaan", d.bentuk], ["Tingkat Kesulitan", d.tingkat]], "Bank Soal": d => [["Komposisi Soal", `${d.nPG} pilihan ganda (${d.opsi} opsi), ${d.nUr} uraian`], ["Level Kognitif", d.level]] };
+const ident = d => tbl(null, [["Satuan Pendidikan", d.sekolah || "—"], ["Guru", d.guru], ["Jenjang", d.jenjang], ...(d.jenjang === "SMK" ? [["Program Keahlian", d.program]] : []), ["Fase / Kelas", d.kelas], ["Mata Pelajaran", d.mapel], ["Topik", d.topik], [d.tipe === "Bank Soal" ? "Durasi Pengerjaan" : "Alokasi Waktu", d.waktu], ...EXTRA[d.tipe](d)]);
+
+function rpp(d) {
+  const t = d.topik, tot = mins(d.waktu), a = r5(tot * .15), inti = tot - 2 * a, m = r5(inti * .25), rf = r5(inti * .2), ap = tot - 2 * a - m - rf;
+  const dims = d.dims.length ? d.dims : ["Penalaran Kritis"];
+  const S = syn(d);
+  return `
+  <h2>A. Identitas</h2>${ident(d)}
+  <h2>B. Identifikasi</h2>
+  <h3>1. Peserta Didik</h3>${ul([`Karakteristik kelas: ${d.karakter.toLowerCase()}. Pengetahuan awal: telah mengenal konsep dasar yang berkaitan dengan ${t}, tetapi tingkat penguasaannya beragam.`, "Minat: tertarik pada contoh nyata, media visual, dan kegiatan berkelompok.", "Kebutuhan belajar: kecenderungan visual, auditori, dan kinestetik sehingga dibutuhkan variasi media dan tugas (berdiferensiasi pada proses dan produk).", "Tantangan: sebagian peserta didik membutuhkan scaffolding bahasa dan contoh bertahap."])}
+  <h3>2. Materi Pelajaran</h3>${ul([`Fakta/konsep: istilah, definisi, dan prinsip utama ${t}.`, `Prosedural: langkah menerapkan ${t} pada situasi nyata.`, `Relevansi: pemanfaatan ${t} dalam kehidupan sehari-hari${d.jenjang === "SMK" ? " dan dunia kerja program keahlian " + d.program : ""}.`])}
+  <h3>3. Dimensi Profil Lulusan</h3>${ul(dims.map(x => `<b>${x}</b>: dikembangkan melalui kegiatan ${d.model.replace(/ \(.*/, "")} dan ${d.metode[0].toLowerCase()}.`))}
+  <h2>C. Desain Pembelajaran</h2>
+  <h3>1. Capaian Pembelajaran</h3><p>Pada akhir ${d.kelas.split(" (")[0]}, peserta didik mampu memahami, menerapkan, dan mengomunikasikan konsep ${t} pada ${d.mapel} secara bernalar kritis dan bertanggung jawab.</p>
+  <h3>2. Lintas Disiplin Ilmu</h3>${ul(["Bahasa Indonesia (menyusun laporan dan presentasi)", "Matematika/literasi numerasi (pengolahan data sederhana)", "Informatika (pemanfaatan sumber dan alat digital)"])}
+  <h3>3. Tujuan Pembelajaran</h3>${ol([`Melalui pengamatan dan diskusi, peserta didik mampu menjelaskan konsep dasar ${t} dengan tepat.`, `Melalui ${d.model.replace(/ \(.*/, "")}, peserta didik mampu menerapkan ${t} pada kasus kontekstual dengan benar.`, `Melalui kerja kelompok, peserta didik mampu menganalisis permasalahan terkait ${t} dan menyajikan solusinya secara runtut.`, `Melalui refleksi, peserta didik mampu menilai pemahaman dan menetapkan langkah perbaikan belajarnya.`])}
+  <h3>4. Topik dan Pertanyaan Pemantik</h3><p>Topik: <b>${t}</b></p>${ul([`Mengapa ${t} penting dalam kehidupan kita?`, `Bagaimana ${t} dapat diterapkan untuk menyelesaikan masalah di sekitar kita?`])}
+  <h3>5. Praktik Pedagogis</h3>${ul([`<b>Strategi:</b> ${d.strategi} — ${STRATEGI[d.strategi]}.`, `<b>Model:</b> ${d.model} dengan sintaks: ${S.map(s => s[0]).join(" → ")}.`, `<b>Metode:</b> ${d.metode.join(", ")}.`])}
+  <h3>6. Kemitraan Pembelajaran</h3>${ul(["Orang tua: pendampingan tugas dan dukungan belajar di rumah.", d.jenjang === "SMK" ? `Dunia usaha/industri: narasumber atau praktisi bidang ${d.program}.` : "Komunitas/narasumber lokal sebagai sumber belajar.", "Pustakawan/laboran: penyediaan sumber dan sarana belajar."])}
+  <h3>7. Lingkungan Pembelajaran</h3>${ul(["Ruang fisik: tata kursi berkelompok dan sudut sumber belajar.", "Budaya kelas: saling menghargai, berani bertanya, dan belajar dari kesalahan.", "Ruang virtual: Google Classroom/LMS untuk tugas dan materi."])}
+  <h3>8. Pemanfaatan Digital</h3>${ul(["Presentasi/video pemantik, kuis interaktif untuk asesmen formatif, dokumen kolaboratif untuk kerja kelompok.", "Peserta didik diarahkan memakai AI secara bijak dan transparan sebagai pendamping belajar, bukan pengganti proses berpikir."])}
+  <h2>D. Pengalaman Belajar</h2>${+d.pertemuan > 1 ? `<p><i>Rincian untuk pertemuan 1 dari ${d.pertemuan}; pertemuan berikutnya melanjutkan sintaks dan tujuan secara bertahap.</i></p>` : ""}
+  ${tbl(["Tahap", "Kegiatan", "Waktu"], [
+    ["<b>Awal</b><br>(berkesadaran, menyenangkan)", ol(["Salam, doa, presensi, dan pengondisian kelas.", `Apersepsi: mengaitkan ${t} dengan pengalaman peserta didik.`, "Menyampaikan pertanyaan pemantik, tujuan, dan alur belajar.", "Asesmen diagnostik singkat (kuis 3 soal) untuk memetakan kesiapan."]), a + " menit"],
+    ["<b>Inti — Memahami</b><br>(berkesadaran, bermakna)", ol([`Peserta didik mengamati media/stimulus tentang ${t}.`, `Guru memberi penjelasan konsep melalui ${d.metode.includes("Ceramah interaktif") ? "ceramah interaktif" : "tanya jawab terarah"}.`, "Peserta didik mencatat konsep kunci dalam peta konsep."]), m + " menit"],
+    [`<b>Inti — Mengaplikasi</b><br>(${d.model})`, ol(S.map(s => `<b>${s[0]}:</b> ${s[1]}`)), ap + " menit"],
+    ["<b>Inti — Merefleksi</b>", ol(["Peserta didik menuliskan hal yang telah dipahami dan yang masih sulit.", "Guru memberi umpan balik dan penguatan konsep."]), rf + " menit"],
+    ["<b>Penutup</b>", ol(["Menyimpulkan pembelajaran bersama.", "Refleksi perasaan dan manfaat belajar (jurnal singkat).", "Tindak lanjut: tugas/penguatan serta informasi pertemuan berikutnya.", "Doa dan salam penutup."]), a + " menit"],
+  ])}
+  <h2>E. Asesmen Pembelajaran</h2>
+  <h3>1. Asesmen Awal (Diagnostik)</h3><p>Kuis singkat dan tanya jawab untuk memetakan pengetahuan awal serta kesiapan belajar.</p>
+  <h3>2. Asesmen Proses (Formatif)</h3>${ul(["Observasi keaktifan dan kolaborasi dengan lembar pengamatan.", "Penilaian LKPD dan hasil diskusi kelompok.", "Umpan balik lisan/tertulis dan jurnal refleksi peserta didik."])}
+  <h3>3. Asesmen Akhir (Sumatif)</h3><p>Tes tertulis (bank soal terlampir) dan penilaian produk/presentasi.</p>
+  ${tbl(["Kriteria", "Sangat Baik (4)", "Baik (3)", "Cukup (2)", "Perlu Bimbingan (1)"], [
+    ["Pemahaman konsep", `Menjelaskan ${t} lengkap dan akurat`, "Lengkap, sedikit kekeliruan", "Sebagian benar", "Belum tepat"],
+    ["Penerapan dalam kasus", "Tepat dan kreatif", "Tepat", "Sebagian tepat", "Belum tepat"],
+    ["Kolaborasi dan komunikasi", "Aktif, runtut, percaya diri", "Aktif dan cukup runtut", "Perlu didorong", "Pasif"],
+  ])}
+  <h3>4. Pengayaan dan Remedial</h3>${ul(["Pengayaan: studi kasus lanjutan atau menjadi tutor sebaya.", "Remedial: pembelajaran ulang dengan media sederhana dan bimbingan kelompok kecil."])}`;
+}
+
+const STIM = {
+  "Penemuan (Inkuiri)": t => `Amati fenomena, data, atau contoh terkait ${t}. Temukan pola dan rumuskan konsepnya sendiri melalui kegiatan di bawah.`,
+  "Eksperimen / Praktikum": t => `Lakukan percobaan/praktik sederhana terkait ${t} dengan mengikuti prosedur dan memperhatikan keselamatan kerja.`,
+  "Latihan Terstruktur": t => `Pelajari contoh penyelesaian terkait ${t}, lalu kerjakan latihan dari yang sederhana hingga kompleks.`,
+  "Proyek": t => `Kamu ditugaskan membuat produk/karya yang memanfaatkan ${t}. Rancang, kerjakan, dan presentasikan hasilnya.`,
+  "Studi Kasus": t => `Baca kasus berikut: sebuah situasi nyata menuntut penerapan ${t}. Analisis permasalahan dan usulkan solusi yang tepat.`,
+};
+function lkpd(d) {
+  const t = d.topik, S = syn(d), k = c => d.komponen.includes(c);
+  const praktik = /Eksperimen|Proyek/.test(d.jenisLkpd);
+  const kerja = d.bentuk === "Individu" ? "secara mandiri" : d.bentuk === "Berpasangan" ? "berpasangan" : "secara berkelompok";
+  return `
+  <h2>Identitas</h2>${ident(d)}${approach(d, false)}
+  ${tbl(null, [[d.bentuk === "Kelompok" ? "Nama Kelompok" : "Nama", ""], ...(d.bentuk === "Individu" ? [] : [["Anggota", ""]]), ["Kelas / Tanggal", ""]])}
+  <h2>Petunjuk Belajar</h2>${ol(["Berdoalah sebelum mengerjakan.", "Bacalah setiap kegiatan dengan cermat.", `Kerjakan LKPD ini ${kerja}.`, "Tanyakan kepada guru jika menemui kesulitan."])}
+  <h2>Tujuan Pembelajaran</h2>${ol([`Menjelaskan konsep dasar ${t}.`, `Menerapkan ${t} melalui kegiatan ${d.jenisLkpd.toLowerCase()}.`, d.bentuk === "Individu" ? "Menyajikan hasil pekerjaan secara runtut." : "Mempresentasikan hasil kerja bersama."])}
+  ${praktik ? `<h2>Alat, Bahan, dan Keselamatan Kerja</h2>${ul(["Buku teks/modul, alat tulis, dan kertas kerja", d.jenjang === "SMK" ? `Perlengkapan praktik ${d.program} sesuai standar K3` : "Bahan dan alat sesuai topik", "Gunakan alat dengan hati-hati dan laporkan kendala kepada guru"])}` : ""}
+  <h2>Stimulus (${d.jenisLkpd})</h2><p><i>${STIM[d.jenisLkpd](t)}</i></p>
+  <h2>Langkah Kegiatan (${d.model})</h2>
+  ${S.map((s, i) => `<h3>Kegiatan ${i + 1}: ${s[0]}</h3><p>${s[1]}</p>${d.tingkat === "Dasar" ? "<p><i>Petunjuk: baca contoh dari guru terlebih dahulu, lalu isi bagian di bawah secara bertahap.</i></p>" : ""}<p>Hasil/jawaban:</p>${lines(3)}`).join("")}
+  ${k("Tabel hasil") ? `<h2>Tabel Hasil Pengamatan / Pengerjaan</h2>${tbl(["No", "Data / Temuan", "Analisis", "Keterangan"], [["1", "", "", ""], ["2", "", "", ""], ["3", "", "", ""]])}` : ""}
+  ${k("Pertanyaan diskusi") ? `<h2>Pertanyaan Diskusi</h2>${ol([`Jelaskan dengan kata-katamu sendiri apa yang dimaksud dengan ${t}.`, `Berikan dua contoh penerapan ${t} di sekitarmu.`, "Apa kesulitan yang kamu hadapi dan bagaimana mengatasinya?"])}${lines(4)}` : ""}
+  ${d.tingkat === "Tantangan" ? `<h2>Soal Tantangan</h2><p>Jika kondisi pada kasus diubah, bagaimana ${t} dapat dimodifikasi agar tetap efektif? Jelaskan alasan dan buktimu.</p>${lines(3)}` : ""}
+  <h2>Kesimpulan</h2>${lines(3)}
+  ${k("Refleksi diri") ? `<h2>Refleksi Diri</h2>${tbl(["Pernyataan", "Ya", "Belum"], [["Saya memahami konsep " + t, "☐", "☐"], ["Saya berkontribusi dalam pengerjaan", "☐", "☐"], ["Saya dapat menjelaskan hasil kepada teman", "☐", "☐"]])}` : ""}
+  ${k("Rubrik") ? `<h2>Rubrik Penilaian LKPD</h2>${tbl(["Aspek", "Skor Maks"], [["Ketepatan jawaban kegiatan", "40"], ["Analisis dan pertanyaan diskusi", "30"], [d.bentuk === "Individu" ? "Kemandirian" : "Kerja sama", "20"], ["Kerapian dan ketepatan waktu", "10"]])}` : ""}`;
+}
+
+const STEMS = [
+  ["Menjelaskan pengertian", "Pernyataan yang paling tepat tentang pengertian {t} adalah ...", "Konsep dasar yang memiliki ciri dan prinsip yang dapat diterapkan"],
+  ["Mengidentifikasi ciri", "Ciri utama {t} yang paling sesuai adalah ...", "Memiliki prinsip dan langkah yang runtut"],
+  ["Menerapkan konsep", "Langkah pertama yang tepat saat menerapkan {t} pada masalah sehari-hari adalah ...", "Mengidentifikasi masalah dan konsep yang relevan"],
+  ["Menganalisis perbedaan hasil", "Dua kelompok memperoleh hasil berbeda saat menerapkan {t}. Penyebab yang paling mungkin adalah ...", "Perbedaan data awal atau langkah yang digunakan"],
+  ["Menilai ketepatan penerapan", "Penerapan {t} yang benar ditunjukkan oleh pernyataan ...", "Menggunakan data dan prinsip yang sesuai untuk menyimpulkan"],
+  ["Menjelaskan manfaat", "Manfaat utama mempelajari {t} adalah ...", "Membantu mengambil keputusan yang tepat berdasarkan konsep"],
+  ["Mengidentifikasi kesalahan umum", "Kesalahan yang paling sering terjadi dalam menerapkan {t} adalah ...", "Mengabaikan prosedur dan data pendukung"],
+  ["Memberi contoh kontekstual", "Contoh penerapan {t} dalam kehidupan sehari-hari yang paling tepat adalah ...", "Menggunakan konsep untuk memecahkan masalah nyata di sekitar"],
+  ["Menghubungkan antarkonsep", "Hubungan {t} dengan materi lain dalam {m} yang paling tepat adalah ...", "Saling melengkapi dalam menyelesaikan masalah"],
+  ["Mengevaluasi pilihan solusi", "Dari beberapa solusi berbasis {t}, solusi terbaik adalah yang ...", "Didukung data, efisien, dan sesuai konteks"],
+];
+const UR = [
+  ["Menganalisis contoh", "Jelaskan satu contoh penerapan {t} yang pernah kamu temui, lalu analisis unsur-unsurnya!", 10, "C4"],
+  ["Mengevaluasi penerapan", "Seseorang menerapkan {t} dengan langkah kurang tepat. Berikan penilaianmu disertai alasan dan perbaikannya!", 10, "C5"],
+  ["Merancang solusi", "Rancanglah solusi sederhana untuk masalah di lingkunganmu dengan memanfaatkan {t}. Sertakan langkah dan alasan pemilihannya!", 15, "C6"],
+  ["Membandingkan pendekatan", "Bandingkan dua cara menerapkan {t}, lalu tentukan yang lebih tepat dengan alasan!", 10, "C4"],
+  ["Menyimpulkan dan merekomendasikan", "Susunlah kesimpulan dan rekomendasi dari penerapan {t} pada suatu kasus nyata!", 15, "C5"],
+];
+function soal(d) {
+  const t = d.topik, nP = +d.nPG, nU = +d.nUr, o = +d.opsi, L = "ABCDE";
+  const lv = d.level.startsWith("LOTS") ? ["C1", "C2", "C3"] : d.level.startsWith("MOTS") ? ["C3", "C4"] : d.level.startsWith("HOTS") ? ["C4", "C5", "C6"] : ["C2", "C3", "C4", "C5"];
+  const f = x => x.replace(/\{t\}/g, t).replace(/\{m\}/g, d.mapel);
+  const dist = [`Pernyataan yang tidak berkaitan dengan ${t}`, "Pernyataan yang bertentangan dengan prinsip dasarnya", "Pernyataan yang hanya berlaku pada keadaan tertentu", "Pernyataan yang tidak didukung data atau alasan yang jelas"];
+  const pg = Array.from({ length: nP }, (_, i) => {
+    const [ind, q, ok] = STEMS[i % STEMS.length], pos = (i * 2 + 1) % o, op = dist.slice(0, o - 1);
+    op.splice(pos, 0, ok);
+    return { ind, q: f(q), op, key: L[pos], ok, lv: lv[i % lv.length] };
+  });
+  const ur = Array.from({ length: nU }, (_, i) => UR[i % UR.length]);
+  const skorU = ur.reduce((a, u) => a + u[2], 0);
+  return `
+  <h2>Identitas</h2>${ident(d)}
+  ${d.stimulus ? `<h2>Stimulus</h2><p><i>Dalam kehidupan sehari-hari, ${t} sering dijumpai pada berbagai situasi. Seorang peserta didik menemukan bahwa penerapan ${t} memberi hasil berbeda ketika data atau langkah yang digunakan berubah. Gunakan informasi ini untuk menjawab soal-soal berikut.</i></p>` : ""}
+  <h2>A. Kisi-kisi</h2>
+  ${tbl(["No.", "Indikator Soal", "Level", "Bentuk"], [...pg.map((x, i) => [i + 1, x.ind + " " + t, x.lv, "Pilihan Ganda"]), ...ur.map((u, i) => [nP + i + 1, u[0] + " " + t, u[3], "Uraian"])])}
+  <h2>B. Soal Pilihan Ganda (${nP} soal)</h2>
+  ${ol(pg.map(x => x.q + "<br>" + x.op.map((a, j) => L[j] + ". " + a).join("<br>")))}
+  <h2>C. Soal Uraian (${nU} soal)</h2>
+  ${ol(ur.map(u => `${f(u[1])} (skor ${u[2]})`))}
+  ${d.kunci ? `<h2>D. Kunci Jawaban dan Pembahasan</h2>${tbl(["No.", "Kunci", "Pembahasan"], pg.map((x, i) => [i + 1, x.key, `Pilihan ${x.key} tepat karena: ${x.ok.toLowerCase()}.`]))}<p><b>Uraian:</b> jawaban dinilai dari ketepatan konsep, kelengkapan alasan, dan kejelasan solusi.</p>` : ""}
+  <h2>${d.kunci ? "E" : "D"}. Pedoman Penskoran</h2>${ul([`Pilihan ganda: benar = 1 poin (maks. ${nP} poin).`, `Uraian: maks. ${skorU} poin sesuai bobot tiap soal.`, `Nilai akhir = (skor PG + skor uraian) / ${nP + skorU} × 100.`])}
+  <p><i>Catatan: ini draf awal dari AI; mohon disesuaikan dengan materi dan buku ajar yang Anda gunakan.</i></p>`;
+}
+const gen = d => d.tipe === "RPP" ? rpp(d) : d.tipe === "LKPD" ? lkpd(d) : soal(d);
+
+const jb = { SD: "bg-emerald-100 text-emerald-700", SMP: "bg-amber-100 text-amber-700", SMA: "bg-sky-100 text-sky-700", SMK: "bg-indigo-100 text-indigo-700" };
+const tb = { RPP: "bg-sky-100 text-sky-800", LKPD: "bg-teal-100 text-teal-800", "Bank Soal": "bg-violet-100 text-violet-800" };
+const inp = "w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-600 focus:border-sky-600";
+
+const initials = n => n.split(",")[0].split(" ").filter(Boolean).slice(0, 2).map(w => w[0].toUpperCase()).join("") || "G";
+const avatar = n => "data:image/svg+xml;utf8," + encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' fill='#0369a1'/><text x='32' y='41' font-size='26' font-family='Arial' font-weight='bold' fill='#fff' text-anchor='middle'>${initials(n)}</text></svg>`);
+const deriveName = em => em.split("@")[0].split(/[._\-]+/).filter(w => w && !/\d/.test(w)).map(w => w[0].toUpperCase() + w.slice(1)).join(" ") || "Guru";
+
+function AuthShell({ children }) {
+  return (
+    <div className="min-h-screen md:grid md:grid-cols-2">
+      <div className="hidden md:flex flex-col justify-between bg-sky-950 text-white p-10">
+        <div className="flex items-center gap-2 text-xl font-bold"><Icon n="cap" c="w-7 h-7" />EduForge</div>
+        <div>
+          <h2 className="text-3xl font-bold leading-tight">Susun RPP, LKPD, dan Bank Soal dalam hitungan detik.</h2>
+          <p className="mt-3 text-sky-200">Perangkat pembelajaran terpadu untuk guru SD hingga SMK, disesuaikan dengan strategi, model, dan metode pilihan Anda.</p>
+        </div>
+        <div className="text-xs text-sky-300">© 2026 EduForge — prototipe</div>
+      </div>
+      <div className="flex items-center justify-center p-6 min-h-screen md:min-h-0">
+        <div className="w-full max-w-sm">
+          <div className="md:hidden flex items-center gap-2 text-sky-900 text-xl font-bold mb-6"><Icon n="cap" c="w-7 h-7" />EduForge</div>
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Login({ onLogin, toRegister }) {
+  const [email, setEmail] = useState("");
+  const [pw, setPw] = useState("");
+  const [err, setErr] = useState("");
+  const submit = e => {
+    e.preventDefault();
+    if (!email.includes("@") || pw.length < 4) return setErr("Masukkan email yang valid dan kata sandi minimal 4 karakter.");
+    setErr(onLogin(email.trim().toLowerCase(), pw));
+  };
+  return (
+    <AuthShell>
+      <form onSubmit={submit}>
+        <h1 className="text-2xl font-bold text-slate-800">Masuk ke akun Anda</h1>
+        <p className="text-sm text-slate-500 mb-6">Selamat datang kembali, silakan masuk untuk melanjutkan.</p>
+        <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
+        <input className={inp + " mb-4"} type="email" placeholder="nama@sekolah.sch.id" value={email} onChange={e => setEmail(e.target.value)} />
+        <label className="block text-sm font-medium text-slate-700 mb-1">Kata sandi</label>
+        <input className={inp} type="password" placeholder="Kata sandi" value={pw} onChange={e => setPw(e.target.value)} />
+        {err && <p className="text-sm text-red-600 mt-3">{err}</p>}
+        <button className="w-full bg-sky-800 hover:bg-sky-900 text-white font-medium py-2.5 rounded-lg mt-5">Masuk</button>
+        <p className="text-sm text-slate-500 text-center mt-6">Belum punya akun? <button type="button" onClick={toRegister} className="text-sky-800 font-medium hover:underline">Daftar</button></p>
+      </form>
+    </AuthShell>
+  );
+}
+
+function Register({ onRegister, toLogin }) {
+  const [f, setF] = useState({ nama: "", sapaan: "Bu", email: "", sekolah: "", mapel: "", pw: "", pw2: "" });
+  const [err, setErr] = useState("");
+  const set = k => e => setF({ ...f, [k]: e.target.value });
+  const submit = e => {
+    e.preventDefault();
+    if (!f.nama.trim() || !f.sekolah.trim() || !f.mapel.trim()) return setErr("Lengkapi nama, sekolah, dan mata pelajaran.");
+    if (!f.email.includes("@")) return setErr("Masukkan email yang valid.");
+    if (f.pw.length < 6) return setErr("Kata sandi minimal 6 karakter.");
+    if (f.pw !== f.pw2) return setErr("Konfirmasi kata sandi tidak cocok.");
+    setErr(onRegister({ ...f, nama: f.nama.trim(), email: f.email.trim().toLowerCase() }));
+  };
+  return (
+    <AuthShell>
+      <form onSubmit={submit} className="grid gap-3">
+        <div><h1 className="text-2xl font-bold text-slate-800">Buat akun baru</h1><p className="text-sm text-slate-500">Daftar untuk mulai menyusun perangkat pembelajaran.</p></div>
+        <div className="grid grid-cols-3 gap-3">
+          <div className="col-span-2"><label className="block text-sm font-medium text-slate-700 mb-1">Nama lengkap</label><input className={inp} placeholder="mis. Gea Pratiwi, S.Pd." value={f.nama} onChange={set("nama")} /></div>
+          <div><label className="block text-sm font-medium text-slate-700 mb-1">Sapaan</label><select className={inp} value={f.sapaan} onChange={set("sapaan")}><option>Bu</option><option>Pak</option></select></div>
+        </div>
+        <div><label className="block text-sm font-medium text-slate-700 mb-1">Email</label><input className={inp} type="email" placeholder="nama@sekolah.sch.id" value={f.email} onChange={set("email")} /></div>
+        <div><label className="block text-sm font-medium text-slate-700 mb-1">Sekolah tempat mengajar</label><input className={inp} placeholder="mis. SMK Negeri 1 Bandung" value={f.sekolah} onChange={set("sekolah")} /></div>
+        <div><label className="block text-sm font-medium text-slate-700 mb-1">Mata pelajaran yang diampu</label><input className={inp} placeholder="mis. Akuntansi Dasar" value={f.mapel} onChange={set("mapel")} /></div>
+        <div className="grid grid-cols-2 gap-3">
+          <div><label className="block text-sm font-medium text-slate-700 mb-1">Kata sandi</label><input className={inp} type="password" value={f.pw} onChange={set("pw")} /></div>
+          <div><label className="block text-sm font-medium text-slate-700 mb-1">Ulangi sandi</label><input className={inp} type="password" value={f.pw2} onChange={set("pw2")} /></div>
+        </div>
+        {err && <p className="text-sm text-red-600">{err}</p>}
+        <button className="w-full bg-sky-800 hover:bg-sky-900 text-white font-medium py-2.5 rounded-lg">Daftar</button>
+        <p className="text-sm text-slate-500 text-center">Sudah punya akun? <button type="button" onClick={toLogin} className="text-sky-800 font-medium hover:underline">Masuk</button></p>
+      </form>
+    </AuthShell>
+  );
+}
+
+function Dashboard({ docs, onNew, onOpen }) {
+  const [f, setF] = useState("Semua");
+  const rows = docs.filter(x => f === "Semua" || x.tipe === f);
+  return (
+    <div>
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 mb-5">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-800">Riwayat Perangkat Pembelajaran</h1>
+          <p className="text-slate-500 text-sm">RPP, LKPD, dan bank soal yang pernah Anda buat.</p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <button onClick={() => onNew("RPP")} className="inline-flex items-center gap-2 bg-sky-800 hover:bg-sky-900 text-white font-medium px-4 py-2.5 rounded-lg"><Icon n="plus" c="w-4 h-4" />Buat RPP Baru</button>
+          <button onClick={() => onNew("LKPD")} className="inline-flex items-center gap-2 bg-white border border-sky-300 text-sky-800 hover:bg-sky-50 font-medium px-4 py-2.5 rounded-lg">Buat LKPD</button>
+          <button onClick={() => onNew("Bank Soal")} className="inline-flex items-center gap-2 bg-white border border-sky-300 text-sky-800 hover:bg-sky-50 font-medium px-4 py-2.5 rounded-lg">Buat Bank Soal</button>
+        </div>
+      </div>
+      <div className="flex gap-2 mb-4 overflow-x-auto">
+        {["Semua", "RPP", "LKPD", "Bank Soal"].map(x => <button key={x} onClick={() => setF(x)} className={"px-3 py-1.5 rounded-full text-sm whitespace-nowrap " + (f === x ? "bg-sky-800 text-white" : "bg-white border border-slate-200 text-slate-600")}>{x}</button>)}
+      </div>
+      {rows.length === 0 ? (
+        <div className="bg-white rounded-xl border border-dashed border-slate-300 p-10 text-center text-slate-500"><Icon n="file" c="w-8 h-8 mx-auto text-sky-300 mb-2" />Perangkat pembelajaran yang telah Anda buat akan muncul di sini.</div>
+      ) : (<>
+        <div className="hidden md:block bg-white rounded-xl border border-slate-200 overflow-hidden">
+          <table className="w-full text-sm">
+            <thead className="bg-slate-50 text-slate-500 text-left"><tr>{["Judul", "Jenis", "Jenjang", "Mata Pelajaran", "Tanggal Dibuat"].map(h => <th key={h} className="px-4 py-3 font-medium">{h}</th>)}</tr></thead>
+            <tbody>{rows.map(m => (
+              <tr key={m.id} onClick={() => onOpen(m)} className="border-t border-slate-100 hover:bg-sky-50 cursor-pointer">
+                <td className="px-4 py-3 font-medium text-slate-800"><span className="inline-flex items-center gap-2"><Icon n="file" c="w-4 h-4 text-sky-700" />{m.judul}</span></td>
+                <td className="px-4 py-3"><span className={"px-2 py-0.5 rounded-full text-xs font-medium " + tb[m.tipe]}>{m.tipe}</span></td>
+                <td className="px-4 py-3"><span className={"px-2 py-0.5 rounded-full text-xs font-medium " + jb[m.jenjang]}>{m.jenjang}</span></td>
+                <td className="px-4 py-3 text-slate-600">{m.mapel}</td><td className="px-4 py-3 text-slate-500">{m.tgl}</td>
+              </tr>))}</tbody>
+          </table>
+        </div>
+        <div className="md:hidden grid gap-3">{rows.map(m => (
+          <button key={m.id} onClick={() => onOpen(m)} className="text-left bg-white rounded-xl border border-slate-200 p-4 hover:bg-sky-50">
+            <div className="font-semibold text-slate-800">{m.judul}</div>
+            <div className="flex gap-2 mt-2"><span className={"px-2 py-0.5 rounded-full text-xs font-medium " + tb[m.tipe]}>{m.tipe}</span><span className={"px-2 py-0.5 rounded-full text-xs font-medium " + jb[m.jenjang]}>{m.jenjang}</span></div>
+            <div className="text-sm text-slate-600 mt-2">{m.mapel} · <span className="text-xs text-slate-400">{m.tgl}</span></div>
+          </button>))}</div>
+      </>)}
+    </div>
+  );
+}
+
+const Field = ({ label, children }) => <label className="block"><span className="block text-sm font-medium text-slate-700 mb-1">{label}</span>{children}</label>;
+
+const Chips = ({ opts, val, on }) => (
+  <div className="flex flex-wrap gap-2">{opts.map(m => <button type="button" key={m} onClick={() => on(val.includes(m) ? val.filter(x => x !== m) : [...val, m])} className={"px-3 py-1.5 rounded-full text-sm border " + (val.includes(m) ? "bg-sky-800 border-sky-800 text-white" : "bg-white border-slate-300 text-slate-600")}>{m}</button>)}</div>
+);
+const Sec = ({ t, children }) => <div className="border-t border-slate-200 pt-4"><div className="text-sm font-semibold text-sky-900 mb-3">{t}</div><div className="grid gap-4">{children}</div></div>;
+
+function FormPage({ d, setD, onSubmit, onBack }) {
+  const set = k => e => setD({ ...d, [k]: e.target.value });
+  const sel = (k, label, opts, ph) => <Field label={label}><select className={inp} value={d[k]} onChange={set(k)}>{ph && <option value="">{ph}</option>}{opts.map(x => <option key={x}>{x}</option>)}</select></Field>;
+  const txt = (k, label, ph) => <Field label={label}><input className={inp} placeholder={ph} value={d[k]} onChange={set(k)} /></Field>;
+  const models = Object.keys(SYN).filter(m => d.jenjang === "SMK" || !m.includes("TEFA"));
+  const T = d.tipe;
+  const base = d.kelas && d.mapel && d.topik && d.waktu && (d.jenjang !== "SMK" || d.program);
+  const ok = base && (T === "Bank Soal" || d.metode.length) && (T !== "RPP" || d.dims.length);
+  return (
+    <div className="max-w-2xl mx-auto">
+      <button onClick={onBack} className="text-sm text-sky-800 inline-flex items-center gap-1 mb-4 hover:underline"><Icon n="left" c="w-4 h-4" />Kembali</button>
+      <div className="bg-white rounded-xl border border-slate-200 p-5 sm:p-8">
+        <h1 className="text-xl font-bold text-slate-800">Buat {T} Baru</h1>
+        <p className="text-sm text-slate-500 mb-5">{META[T]}</p>
+        <div className="grid gap-4">
+          <Field label="Jenjang">
+            <select className={inp} value={d.jenjang} onChange={e => setD({ ...d, jenjang: e.target.value, kelas: "", program: "", model: d.model.includes("TEFA") ? "Problem Based Learning (PBL)" : d.model })}>
+              {["SD", "SMP", "SMA", "SMK"].map(j => <option key={j}>{j}</option>)}
+            </select>
+          </Field>
+          {d.jenjang === "SMK" && sel("program", "Program Keahlian", PROGRAM, "Pilih program keahlian")}
+          {sel("kelas", "Kelas / Fase", FASE[d.jenjang], "Pilih kelas/fase")}
+          {txt("mapel", "Mata Pelajaran", "mis. Informatika")}
+          {txt("topik", T === "Bank Soal" ? "Materi yang Diujikan" : "Topik / Materi", "mis. Jaringan Komputer Dasar")}
+          {txt("waktu", T === "Bank Soal" ? "Durasi Pengerjaan" : "Alokasi Waktu", T === "Bank Soal" ? "mis. 60 menit" : "mis. 2 x 45 menit")}
+        </div>
+
+        {T === "RPP" && <>
+          <div className="mt-4"><Sec t="Karakteristik Pembelajaran">
+            <div className="grid sm:grid-cols-2 gap-4">{sel("pertemuan", "Jumlah Pertemuan", ["1", "2", "3", "4"])}{sel("karakter", "Karakteristik Peserta Didik", ["Heterogen (kemampuan beragam)", "Cenderung visual", "Cenderung kinestetik", "Membutuhkan penguatan dasar", "Sudah cukup mahir"])}</div>
+          </Sec></div>
+          <div className="mt-4"><Sec t="Praktik Pedagogis">
+            <div className="grid sm:grid-cols-2 gap-4">{sel("strategi", "Strategi", Object.keys(STRATEGI))}{sel("model", "Model", models)}</div>
+            <div><span className="block text-sm font-medium text-slate-700 mb-2">Metode (pilih satu atau lebih)</span><Chips opts={METODE} val={d.metode} on={v => setD({ ...d, metode: v })} /></div>
+          </Sec></div>
+          <div className="mt-4"><Sec t="Dimensi Profil Lulusan (pilih satu atau lebih)"><Chips opts={DIM} val={d.dims} on={v => setD({ ...d, dims: v })} /></Sec></div>
+        </>}
+
+        {T === "LKPD" && <>
+          <div className="mt-4"><Sec t="Rancangan LKPD">
+            <div className="grid sm:grid-cols-2 gap-4">{sel("jenisLkpd", "Jenis LKPD", JENIS)}{sel("bentuk", "Bentuk Pengerjaan", ["Kelompok", "Berpasangan", "Individu"])}</div>
+            <div className="grid sm:grid-cols-2 gap-4">{sel("tingkat", "Tingkat Kesulitan", ["Dasar", "Menengah", "Tantangan"])}{sel("model", "Model Pembelajaran (menentukan langkah kegiatan)", models)}</div>
+            <div><span className="block text-sm font-medium text-slate-700 mb-2">Metode</span><Chips opts={METODE} val={d.metode} on={v => setD({ ...d, metode: v })} /></div>
+            <div><span className="block text-sm font-medium text-slate-700 mb-2">Komponen yang disertakan</span><Chips opts={KOMP} val={d.komponen} on={v => setD({ ...d, komponen: v })} /></div>
+          </Sec></div>
+        </>}
+
+        {T === "Bank Soal" && <>
+          <div className="mt-4"><Sec t="Komposisi Soal">
+            <div className="grid sm:grid-cols-3 gap-4">{sel("nPG", "Jumlah Pilihan Ganda", ["5", "10", "15"])}{sel("opsi", "Jumlah Opsi", ["4", "5"])}{sel("nUr", "Jumlah Uraian", ["2", "3", "5"])}</div>
+            {sel("level", "Level Kognitif", ["Campuran (C2–C5)", "LOTS (C1–C3)", "MOTS (C3–C4)", "HOTS (C4–C6)"])}
+            <label className="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" checked={d.stimulus} onChange={e => setD({ ...d, stimulus: e.target.checked })} />Sertakan stimulus kontekstual</label>
+            <label className="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" checked={d.kunci} onChange={e => setD({ ...d, kunci: e.target.checked })} />Sertakan kunci jawaban dan pembahasan</label>
+          </Sec></div>
+        </>}
+
+        <button disabled={!ok} onClick={onSubmit} className="mt-6 w-full inline-flex items-center justify-center gap-2 bg-sky-800 hover:bg-sky-900 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-medium px-4 py-3 rounded-lg"><Icon n="spark" c="w-4 h-4" />Generate {T} dengan AI</button>
+        {!ok && <p className="text-xs text-slate-400 mt-2 text-center">Lengkapi semua kolom wajib dan pilihan yang diperlukan.</p>}
+      </div>
+    </div>
+  );
+}
+
+function Loading({ tipe }) {
+  return (
+    <div className="max-w-xl mx-auto text-center py-12">
+      <div className="mx-auto w-14 h-14 rounded-full border-4 border-sky-100 border-t-sky-800 animate-spin"></div>
+      <p className="mt-6 text-lg font-semibold text-slate-800">AI sedang menyusun perangkat pembelajaran Anda...</p>
+      <p className="text-sm text-slate-500 mt-1">Menyusun {tipe} sesuai strategi, model, dan metode yang dipilih.</p>
+      <div className="mt-8 bg-white rounded-xl border border-slate-200 p-5 text-left animate-pulse space-y-3">
+        <div className="h-4 bg-slate-200 rounded w-1/3"></div><div className="h-3 bg-slate-100 rounded"></div><div className="h-3 bg-slate-100 rounded w-5/6"></div>
+        <div className="h-4 bg-slate-200 rounded w-1/4 mt-4"></div><div className="h-3 bg-slate-100 rounded w-4/6"></div>
+      </div>
+    </div>
+  );
+}
+
+function Result({ d, user, onBack, onSwitch }) {
+  const cmd = c => document.execCommand(c);
+  const btn = "p-2 rounded hover:bg-slate-100 text-slate-600";
+  const others = ["RPP", "LKPD", "Bank Soal"].filter(x => x !== d.tipe);
+  return (
+    <div className="max-w-4xl mx-auto">
+      <div className="flex flex-wrap gap-2 justify-between items-center mb-4">
+        <button onClick={onBack} className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 px-3 py-2 rounded-lg"><Icon n="left" c="w-4 h-4" />Kembali ke Dashboard</button>
+        <div className="flex gap-2">
+          <button onClick={() => alert("Fitur Download PDF akan tersedia di versi berikutnya.")} className="inline-flex items-center gap-1.5 text-sm font-medium text-white bg-sky-800 hover:bg-sky-900 px-3 py-2 rounded-lg"><Icon n="down" c="w-4 h-4" />Download PDF</button>
+          <button onClick={() => alert("Fitur Download Word akan tersedia di versi berikutnya.")} className="inline-flex items-center gap-1.5 text-sm font-medium text-sky-800 bg-sky-50 border border-sky-200 hover:bg-sky-100 px-3 py-2 rounded-lg"><Icon n="down" c="w-4 h-4" />Download Word</button>
+        </div>
+      </div>
+      <div className="flex flex-wrap items-center gap-2 mb-4 text-sm">
+        <span className="text-slate-500">Lanjutkan dari data yang sama:</span>
+        {others.map(x => <button key={x} onClick={() => onSwitch(x)} className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-white border border-sky-300 text-sky-800 hover:bg-sky-50"><Icon n="spark" c="w-3.5 h-3.5" />Buat {x}</button>)}
+      </div>
+      <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+        <div className="flex items-center gap-1 px-3 py-2 border-b border-slate-200 bg-slate-50">
+          <button className={btn} onMouseDown={e => { e.preventDefault(); cmd("bold"); }}><Icon n="bold" c="w-4 h-4" /></button>
+          <button className={btn} onMouseDown={e => { e.preventDefault(); cmd("italic"); }}><Icon n="ital" c="w-4 h-4" /></button>
+          <button className={btn} onMouseDown={e => { e.preventDefault(); cmd("insertUnorderedList"); }}><Icon n="list" c="w-4 h-4" /></button>
+          <span className="ml-auto text-xs text-slate-400 inline-flex items-center gap-1"><Icon n="edit" c="w-3 h-3" />Klik teks untuk mengedit</span>
+        </div>
+        <div className="p-5 sm:p-10 text-slate-700 text-sm leading-relaxed">
+          <h1 className="text-lg sm:text-2xl font-bold text-sky-900 text-center uppercase">{TITLE[d.tipe]}</h1>
+          <p className="text-center text-slate-500 mb-2">{d.mapel} — {d.topik}</p>
+          <div className="doc" contentEditable suppressContentEditableWarning dangerouslySetInnerHTML={{ __html: gen({ ...d, guru: user.nama, sekolah: user.sekolah }) }} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const BLANK = { tipe: "RPP", jenjang: "SMK", program: "", kelas: "", mapel: "", topik: "", waktu: "", strategi: "Pembelajaran Kolaboratif", model: "Problem Based Learning (PBL)", metode: ["Diskusi kelompok", "Tanya jawab"], pertemuan: "1", karakter: "Heterogen (kemampuan beragam)", dims: ["Penalaran Kritis", "Kolaborasi", "Komunikasi"], jenisLkpd: "Penemuan (Inkuiri)", bentuk: "Kelompok", tingkat: "Menengah", komponen: [...KOMP], nPG: "10", opsi: "4", nUr: "3", level: "Campuran (C2–C5)", stimulus: true, kunci: true };
+
+const SEMS = ["Ganjil 2026/2027", "Genap 2025/2026", "Ganjil 2025/2026"];
+function Profile({ user, docs, onBack, onSave, onDone }) {
+  const [sm, setSm] = useState(SEMS[0]);
+  const [ed, setEd] = useState(false);
+  const [f, setF] = useState(user);
+  const set = k => e => setF({ ...f, [k]: e.target.value });
+  const ds = docs.filter(x => x.sem === sm), cnt = t => ds.filter(x => x.tipe === t).length;
+  const rp = ds.filter(x => x.tipe === "RPP");
+  const plan = rp.reduce((a, x) => a + x.plan, 0), done = rp.reduce((a, x) => a + x.done, 0);
+  const jam = Math.round(rp.reduce((a, x) => a + x.done * x.menit, 0) / 6) / 10, pct = plan ? Math.round(done / plan * 100) : 0;
+  const row = (l, v) => <div><span className="text-slate-400">{l}:</span> {v || <span className="text-slate-400 italic">Belum diisi</span>}</div>;
+  return (
+    <div className="max-w-4xl mx-auto grid gap-5">
+      <button onClick={onBack} className="text-sm text-sky-800 inline-flex items-center gap-1 hover:underline justify-self-start"><Icon n="left" c="w-4 h-4" />Kembali</button>
+      <div className="bg-white rounded-xl border border-slate-200 p-5 sm:p-6">
+        {!ed ? (
+          <div className="flex flex-col sm:flex-row gap-5 items-center sm:items-start">
+            <img src={avatar(user.nama)} alt="Foto profil" className="w-24 h-24 rounded-full border-4 border-sky-100" />
+            <div className="text-center sm:text-left flex-1">
+              <h1 className="text-xl font-bold text-slate-800">{user.nama}</h1>
+              <p className="text-slate-500 text-sm">Guru · {user.sekolah || "Sekolah belum diisi"}</p>
+              <div className="grid sm:grid-cols-2 gap-x-6 gap-y-1 mt-3 text-sm text-slate-600">
+                {row("Sekolah", user.sekolah)}{row("Mata pelajaran", user.mapel)}{row("Email", user.email)}{row("NIP", user.nip)}{row("Telepon", user.telp)}
+              </div>
+            </div>
+            <button onClick={() => { setF(user); setEd(true); }} className="inline-flex items-center gap-1.5 text-sm font-medium text-sky-800 border border-sky-200 hover:bg-sky-50 px-3 py-2 rounded-lg"><Icon n="edit" c="w-4 h-4" />Edit Profil</button>
+          </div>
+        ) : (
+          <div className="grid gap-3">
+            <h2 className="font-bold text-slate-800">Edit Profil</h2>
+            <div className="grid sm:grid-cols-3 gap-3">
+              <div className="sm:col-span-2"><Field label="Nama lengkap"><input className={inp} value={f.nama} onChange={set("nama")} /></Field></div>
+              <Field label="Sapaan"><select className={inp} value={f.sapaan} onChange={set("sapaan")}>{["Bu", "Pak", "Bapak/Ibu"].map(x => <option key={x}>{x}</option>)}</select></Field>
+            </div>
+            <Field label="Sekolah tempat mengajar"><input className={inp} value={f.sekolah} onChange={set("sekolah")} /></Field>
+            <Field label="Mata pelajaran yang diampu"><input className={inp} value={f.mapel} onChange={set("mapel")} /></Field>
+            <div className="grid sm:grid-cols-2 gap-3"><Field label="NIP (opsional)"><input className={inp} value={f.nip} onChange={set("nip")} /></Field><Field label="Telepon (opsional)"><input className={inp} value={f.telp} onChange={set("telp")} /></Field></div>
+            <div className="flex gap-2"><button onClick={() => { if (f.nama.trim()) { onSave({ ...f, nama: f.nama.trim() }); setEd(false); } }} className="bg-sky-800 hover:bg-sky-900 text-white text-sm font-medium px-4 py-2 rounded-lg">Simpan</button><button onClick={() => setEd(false)} className="text-sm text-slate-600 border border-slate-300 px-4 py-2 rounded-lg">Batal</button></div>
+          </div>
+        )}
+      </div>
+      <div className="bg-white rounded-xl border border-slate-200 p-5 sm:p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+          <h2 className="text-lg font-bold text-slate-800">Progres Mengajar</h2>
+          <select className={inp + " sm:w-64"} value={sm} onChange={e => setSm(e.target.value)}>{SEMS.map((x, i) => <option key={x} value={x}>{x}{i === 0 ? " (berjalan)" : ""}</option>)}</select>
+        </div>
+        {ds.length === 0 ? (
+          <div className="rounded-lg border border-dashed border-slate-300 p-8 text-center text-sm text-slate-500">Belum ada data progres pada semester ini. Data akan muncul setelah Anda menyusun perangkat pembelajaran dan menandai pertemuan yang sudah terlaksana.</div>
+        ) : (<>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+            {[["RPP disusun", cnt("RPP")], ["LKPD dibuat", cnt("LKPD")], ["Bank Soal", cnt("Bank Soal")], ["Jam mengajar", jam]].map(([a, b]) => <div key={a} className="rounded-lg bg-sky-50 p-3"><div className="text-xs text-slate-500">{a}</div><div className="text-2xl font-bold text-sky-800">{b}</div></div>)}
+          </div>
+          <div className="mb-5">
+            <div className="flex justify-between text-sm mb-1"><span className="font-medium text-slate-700">Pertemuan terlaksana</span><span className="text-slate-500">{done} / {plan} ({pct}%)</span></div>
+            <div className="h-3 bg-slate-100 rounded-full overflow-hidden"><div className="h-full bg-sky-700 rounded-full" style={{ width: pct + "%" }}></div></div>
+          </div>
+          {rp.length === 0 ? <p className="text-sm text-slate-500">Belum ada RPP pada semester ini, sehingga progres pertemuan belum bisa dicatat.</p> : (
+            <div className="grid gap-2">{rp.map(x => (
+              <div key={x.id} className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 border border-slate-200 rounded-lg p-3">
+                <div className="flex-1 min-w-0"><div className="font-medium text-slate-800 truncate">{x.judul}</div><div className="text-xs text-slate-500">{x.mapel} · {x.done} dari {x.plan} pertemuan terlaksana</div></div>
+                <button disabled={x.done >= x.plan} onClick={() => onDone(x.id)} className="text-sm font-medium px-3 py-1.5 rounded-lg bg-sky-800 text-white hover:bg-sky-900 disabled:bg-slate-200 disabled:text-slate-400 whitespace-nowrap">{x.done >= x.plan ? "Selesai" : "Tandai terlaksana"}</button>
+              </div>))}</div>)}
+        </>)}
+      </div>
+    </div>
+  );
+}
+
+function EduForgeApp() {
+  const [db, setDb] = useState({});
+  const [email, setEmail] = useState(null);
+  const [auth, setAuth] = useState("login");
+  const [page, setPage] = useState("DASHBOARD");
+  const [open, setOpen] = useState(false);
+  const [d, setD] = useState(BLANK);
+  const acc = email ? db[email] : null;
+  const user = acc ? acc.user : null, docs = acc ? acc.docs : [];
+  const upd = fn => setDb(x => ({ ...x, [email]: fn(x[email]) }));
+
+  useEffect(() => {
+    if (page !== "LOADING") return;
+    const t = setTimeout(() => {
+      upd(a => ({ ...a, docs: [{ id: Date.now(), judul: d.topik, tipe: d.tipe, jenjang: d.jenjang, mapel: d.mapel, tgl: new Date().toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" }), sem: SEMS[0], menit: mins(d.waktu), plan: d.tipe === "RPP" ? +d.pertemuan : 0, done: 0, data: d }, ...a.docs] }));
+      setPage("RESULT");
+    }, 3000);
+    return () => clearTimeout(t);
+  }, [page]);
+
+  const enter = em => { setEmail(em); setPage("DASHBOARD"); setD(BLANK); };
+  const login = (em, pw) => {
+    const a = db[em];
+    if (a && a.pw !== pw) return "Kata sandi salah.";
+    if (!a) setDb(x => ({ ...x, [em]: { pw, docs: [], user: { nama: deriveName(em), sapaan: "Bapak/Ibu", email: em, sekolah: "", mapel: "", nip: "", telp: "" } } }));
+    enter(em); return "";
+  };
+  const register = u => {
+    if (db[u.email]) return "Email ini sudah terdaftar. Silakan masuk.";
+    setDb(x => ({ ...x, [u.email]: { pw: u.pw, docs: [], user: { nama: u.nama, sapaan: u.sapaan, email: u.email, sekolah: u.sekolah.trim(), mapel: u.mapel.trim(), nip: "", telp: "" } } }));
+    enter(u.email); return "";
+  };
+
+  if (!user) return auth === "login" ? <Login onLogin={login} toRegister={() => setAuth("register")} /> : <Register onRegister={register} toLogin={() => setAuth("login")} />;
+
+  const go = p => { setPage(p); setOpen(false); window.scrollTo(0, 0); };
+  const start = tipe => { setD({ ...BLANK, tipe }); go("FORM"); };
+  const bukaDoc = x => { setD(x.data); go("RESULT"); };
+  const h = new Date().getHours();
+  const sapa = h < 11 ? "pagi" : h < 15 ? "siang" : h < 18 ? "sore" : "malam";
+  const item = (label, icon, active, fn) => (
+    <button onClick={fn} className={"w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition " + (active ? "bg-sky-700 text-white" : "text-sky-100 hover:bg-sky-800")}><Icon n={icon} c="w-4 h-4" />{label}</button>
+  );
+  const inForm = ["FORM", "LOADING", "RESULT"].includes(page);
+
+  return (
+    <div className="min-h-screen md:flex">
+      <aside className={(open ? "block" : "hidden") + " md:block md:w-60 md:shrink-0 bg-sky-950 p-4 md:min-h-screen"}>
+        <div className="flex items-center gap-2 text-white font-bold text-lg mb-6"><Icon n="cap" c="w-6 h-6" />EduForge</div>
+        <nav className="space-y-1">
+          {item("Dashboard", "home", page === "DASHBOARD", () => go("DASHBOARD"))}
+          {item("Buat RPP", "file", inForm && d.tipe === "RPP", () => start("RPP"))}
+          {item("Buat LKPD", "edit", inForm && d.tipe === "LKPD", () => start("LKPD"))}
+          {item("Buat Bank Soal", "help", inForm && d.tipe === "Bank Soal", () => start("Bank Soal"))}
+          {item("Profil Saya", "user", page === "PROFIL", () => go("PROFIL"))}
+        </nav>
+        <div className="mt-8 text-xs text-sky-300/70 hidden md:block">Prototipe v0.4</div>
+      </aside>
+      <div className="flex-1 min-w-0">
+        <header className="bg-white border-b border-slate-200 px-4 py-3 flex items-center gap-3">
+          <button className="md:hidden text-slate-600" onClick={() => setOpen(!open)}><Icon n="menu" /></button>
+          <div className="min-w-0">
+            <div className="font-semibold text-slate-800 truncate">Selamat {sapa}, {user.sapaan} {user.nama.split(/[ ,]/)[0]}!</div>
+            <div className="text-xs text-slate-500 truncate">Siap menyusun perangkat pembelajaran hari ini?</div>
+          </div>
+          <div className="ml-auto flex items-center gap-3">
+            <div className="hidden sm:block text-right leading-tight"><div className="text-sm font-medium text-slate-700">{user.nama}</div><div className="text-xs text-slate-400">{user.sekolah || "Sekolah belum diisi"}</div></div>
+            <button title="Profil saya" onClick={() => go("PROFIL")}><img src={avatar(user.nama)} alt="Foto profil" className="w-9 h-9 rounded-full border border-sky-200" /></button>
+            <button title="Keluar" onClick={() => { setEmail(null); setAuth("login"); setPage("DASHBOARD"); }} className="p-2 rounded-lg text-slate-500 hover:bg-slate-100"><Icon n="out" c="w-4 h-4" /></button>
+          </div>
+        </header>
+        <main className="p-4 sm:p-6 lg:p-8">
+          {page === "PROFIL" && <Profile user={user} docs={docs} onBack={() => go("DASHBOARD")} onSave={u => upd(a => ({ ...a, user: u }))} onDone={id => upd(a => ({ ...a, docs: a.docs.map(x => x.id === id && x.done < x.plan ? { ...x, done: x.done + 1 } : x) }))} />}
+          {page === "DASHBOARD" && <Dashboard docs={docs} onNew={start} onOpen={bukaDoc} />}
+          {page === "FORM" && <FormPage d={d} setD={setD} onSubmit={() => go("LOADING")} onBack={() => go("DASHBOARD")} />}
+          {page === "LOADING" && <Loading tipe={d.tipe} />}
+          {page === "RESULT" && <Result d={d} user={user} onBack={() => go("DASHBOARD")} onSwitch={tipe => { setD({ ...d, tipe }); go("LOADING"); }} />}
+        </main>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<EduForgeApp />);
+</script>
+</body>
+</html>
